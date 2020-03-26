@@ -1,0 +1,5 @@
+build/**
+**/*.pyc
+.idea/workspace.xml
+venv/**
+.idea/**
