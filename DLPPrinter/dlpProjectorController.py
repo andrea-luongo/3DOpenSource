@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 import numpy as np
 from DLPPrinter.dlpColorCalibrator import DLPColorCalibrator
-from DLPPrinter.projectors import visitechDLP9000, visitechLRS4KA
+from DLPPrinter.projectors import visitechDLP9000
 
 
 class DLPProjectorController(QLabel):

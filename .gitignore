@@ -3,3 +3,4 @@ build/**
 .idea/workspace.xml
 venv/**
 .idea/**
+env/**

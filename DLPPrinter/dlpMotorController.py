@@ -3,7 +3,7 @@ import serial
 import sys
 from serial.tools import list_ports
 from enum import Enum
-from DLPPrinter.motors import clearpathSCSK, clearpathSDSK
+from DLPPrinter.motors import clearpathSDSK
 
 
 class DLPMotorController(QObject):
