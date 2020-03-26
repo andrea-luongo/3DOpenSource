@@ -1,0 +1,13 @@
+#init
+
+i2c_cmd.exe stop
+i2c_cmd.exe init hdmi
+i2c_cmd.exe pixelmode single
+i2c_cmd.exe upload hdmi30fps.txt 0
+i2c_cmd.exe setamplitude 10
+i2c_cmd.exe start
+
+
+#any given time change LED intensity
+i2c_cmd.exe setamplitude 10
+
