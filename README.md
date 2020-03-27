@@ -4,6 +4,7 @@
 This repo is part of the Open Additive Manufacturing project carried out at the Mechanical Department of the Technical University of Denmark, and funded by the Poul Due Jensen foundation (https://www.pdjf.dk/en/program/open-additive-manufacturing/).
 
 ################################################################################################
+
 This framework can be used to print using a DLP 3D printer. Code for controlling a Powder Bed Fusion metal printer will be released in the future.
 Add the moment this software supports only Visitech LRS WQ projector, which uses i2c for communication. 
 The projector came with a usb-i2c adpter by Diolan. To make the code work, place the executable i2c_cmd.exe inside the ./resources folder of this project.
