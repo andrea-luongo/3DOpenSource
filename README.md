@@ -38,7 +38,7 @@ To make the code work:
 
 - open a python terminal in the position of this project.
 - create a new venv by running "py -m venv your_name"
-- activate the environment "./your_name/Scripts/activate"
+- activate the environment ".\your_name\Scripts\activate"
 - run "pip install -r requirements.txt"
 
 ################################################################################################
