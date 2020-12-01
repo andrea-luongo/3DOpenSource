@@ -1,6 +1,7 @@
-from PySide2.QtCore import Signal, Slot, QTimer, QTime, QFileInfo, QObject
+from PySide2.QtCore import Signal, Slot, QObject
 import numpy as np
 import scipy.optimize as opt
+
 
 class DLPColorCalibrator(QObject):
 
@@ -81,8 +82,6 @@ class DLPColorCalibrator(QObject):
         if input_image.dtype.name == 'uint8':
             info = np.iinfo(input_image.dtype)  # Get the data type of the input image
             input_image = input_image.astype(np.float) / info.max
-            # corrected_input = self.im2double(input_image)
-        # corrected_input = input_image
         corrected_input = np.nan_to_num(np.exp((thickness * input_image - a) / b)) + c
         corrected_input[input_image == 0] = 0
         corrected_input[input_image == 1] = 1

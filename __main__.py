@@ -8,7 +8,6 @@ import mainGUI
 from PySide2.QtWidgets import QApplication
 from PySide2.QtOpenGL import QGLFormat
 import sys
-import argparse
 
 
 if __name__ == "__main__":

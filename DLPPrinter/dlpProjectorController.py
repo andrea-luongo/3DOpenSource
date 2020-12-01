@@ -7,6 +7,8 @@ import numpy as np
 from DLPPrinter.dlpColorCalibrator import DLPColorCalibrator
 from DLPPrinter.projectors import visitechDLP9000
 
+DEBUG_MODE_ON = False
+
 
 class DLPProjectorController(QLabel):
 
@@ -18,11 +20,6 @@ class DLPProjectorController(QLabel):
         base_path = Path(__file__).parent
         if projector_setup == 'VisitechDLP9000':
             self.projector_instance = visitechDLP9000.VisitechDLP9000()
-        elif projector_setup == 'VisitechLRS4KA':
-            self.projector_instance = visitechLRS4KA.VisitechLRS4KA()
-            if self.projector_instance is None:
-                self.print_text_signal.emit("Visitech LRS4KA not supported: selected Visitech DLP9000")
-                self.projector_instance = visitechDLP9000.VisitechDLP9000()
         else:
             print("Error: an invalid projector was selected!")
             sys.exit(1)
@@ -100,6 +97,8 @@ class DLPProjectorController(QLabel):
             self.show_image(self.calibration_pattern)
 
     def set_amplitude(self, amplitude):
+        if DEBUG_MODE_ON:
+            return True
         if not self.connected:
             self.print_text_signal.emit("Impossible to set amplitude: projector is not connected!")
             return

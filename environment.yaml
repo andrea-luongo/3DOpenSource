@@ -1,0 +1,19 @@
+name: 3DOpenSource
+channels:
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - iso8601=0.1.12
+  - matplotlib-base=3.3.0
+  - numpy=1.19.1
+  - pip=20.2.2
+  - pyopengl=3.1.5
+  - pyserial=3.4
+  - python=3.7.1
+  - scipy=1.5.0
+  - pip:
+    - PySide2==5.15.0
+    - PIPython==2.3.0.3
+
+prefix: C:\ProgramData\Anaconda3\envs\3DOpenSource

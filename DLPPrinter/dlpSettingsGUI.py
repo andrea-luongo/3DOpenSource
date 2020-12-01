@@ -1,4 +1,5 @@
-from PySide2.QtWidgets import QWidget, QSizePolicy, QFileDialog, QLabel, QTableView, QGroupBox, QHBoxLayout, QVBoxLayout, QPushButton, QGridLayout
+from PySide2.QtWidgets import QWidget, QSizePolicy, QFileDialog, QLabel, QTableView, QGroupBox, QHBoxLayout, QVBoxLayout, QPushButton, QGridLayout,\
+    QAbstractScrollArea, QHeaderView
 from PySide2.QtGui import QGuiApplication, QPainter
 from PySide2.QtCore import Signal, Slot, QAbstractTableModel, Qt
 from PySide2.QtCharts import QtCharts
@@ -21,15 +22,10 @@ class DLPSettingsGUI(QWidget):
         self.main_layout = QHBoxLayout()
         self.__init_table_widget__()
         self.__init_color_calibration_widget()
+        self.__default_parameters_widget.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.MinimumExpanding)
         self.main_layout.addWidget(self.__default_parameters_widget, stretch=1)
         self.main_layout.addWidget(self.__color_calibration_widget, stretch=2)
         self.setLayout(self.main_layout)
-        self.__adjust_table_size__()
-        self.updateGeometry()
-        self.table_view.updateGeometry()
-        self.__color_calibration_widget.updateGeometry()
-        self.__default_parameters_widget.updateGeometry()
-        self.table_model.dataChanged.emit(0, 0)
         self.main_layout.update()
 
     def __init_color_calibration_widget(self, parent=None):
@@ -67,7 +63,7 @@ class DLPSettingsGUI(QWidget):
 
     @Slot()
     def analyze_images(self):
-        file_names = QFileDialog.getOpenFileNames(caption='Select data', dir='../data_analysis/asc_data',
+        file_names = QFileDialog.getOpenFileNames(caption='Select data', dir='../measured_data/grayscale_measured_data',
                                                   filter="Image Files (*.asc)")
         self.dlp_color_calibrator.analyze_data_files(file_names[0])
 
@@ -104,14 +100,17 @@ class DLPSettingsGUI(QWidget):
         self.__default_parameters_widget = QGroupBox("Default Parameters", parent)
         self.printer_parameters_list = self.dlp_controller.get_default_parameters()
         self.table_view = QTableView()
-        self.table_model = self.MyTableModel(parent=self, data_list=self.printer_parameters_list)
+        self.table_model = self.MyTableModel(parent=self.__default_parameters_widget, data_list=self.printer_parameters_list)
         self.table_view.setModel(self.table_model)
-        self.table_view.update()
-        self.table_view.resizeColumnsToContents()
         self.table_view.horizontalHeader().setVisible(False)
         self.table_view.verticalHeader().setVisible(False)
         self.table_view.horizontalHeader().setStretchLastSection(False)
-        apply_button = QPushButton("Apply Changes", self)
+        # self.table_view.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table_view.resizeColumnsToContents()
+        self.table_view.update()
+        # self.table_view.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        # self.table_view.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        apply_button = QPushButton("Apply Changes", self.__default_parameters_widget)
         apply_button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         apply_button.clicked.connect(self.dlp_controller.save_default_parameters)
         default_parameters_layout = QVBoxLayout(self.__default_parameters_widget)
@@ -119,8 +118,8 @@ class DLPSettingsGUI(QWidget):
         default_parameters_layout.addWidget(apply_button)
         self.__default_parameters_widget.setLayout(default_parameters_layout)
         self.__default_parameters_widget.updateGeometry()
-        default_parameters_layout.update()
-        QGuiApplication.processEvents()
+        # default_parameters_layout.update()
+        # QGuiApplication.processEvents()
 
     @Slot()
     def __adjust_table_size__(self):

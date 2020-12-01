@@ -27,10 +27,10 @@ class VisitechDLP9000(QWidget):
             if DEBUG_MODE_ON:
                 print("Fix operating system, line 70.")
             sys.exit(1)
-        # if not os.path.isfile(self.i2c_cmd_filename):
-        #     if DEBUG_MODE_ON:
-        #         print("\"" + self.i2c_cmd_filename + "\" does not exist.")
-        #     sys.exit(1)
+        if not os.path.isfile(self.i2c_cmd_filename):
+            if DEBUG_MODE_ON:
+                print("\"" + self.i2c_cmd_filename + "\" does not exist.")
+            sys.exit(1)
 
         self.init_file = str((base_path / "../../resources/hdmi30fps.txt").resolve())
 

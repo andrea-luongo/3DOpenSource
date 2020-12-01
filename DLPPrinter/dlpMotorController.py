@@ -1,9 +1,8 @@
 from PySide2.QtCore import QObject, Signal, Slot, QTimer, QRunnable, QThreadPool
-import serial
 import sys
 from serial.tools import list_ports
 from enum import Enum
-from DLPPrinter.motors import clearpathSDSK
+from motors import clearpathSDSK, nanostage, clearpathSCSK
 
 
 class DLPMotorController(QObject):
@@ -31,10 +30,12 @@ class DLPMotorController(QObject):
         if motor_setup == 'ClearpathSDSK':
             self.motor_instance = clearpathSDSK.ClearpathSDSK()
         elif motor_setup == 'ClearpathSCSK':
-            self.motor_instance = clearpathSCSK.ClearpathSCSK(spindle_pitch_micron, steps_per_revolution)
+            self.motor_instance = clearpathSCSK.ClearpathSCSK(axis_orientation=-1)
             if self.motor_instance is None:
                 self.print_text_signal.emit("Clearpath SCSK not supported: selected Clearpath SDSK")
                 self.motor_instance = clearpathSDSK.ClearpathSDSK()
+        elif motor_setup == 'Nanostage':
+            self.motor_instance = nanostage.NanoStage()
         else:
             print("Error: an invalid motor was selected!")
             sys.exit(1)
@@ -84,12 +85,12 @@ class DLPMotorController(QObject):
 
     @Slot()
     def connect_printer(self):
-        worker = Worker(self.motor_instance.connect_printer, self.serial_port)
+        worker = Worker(self.motor_instance.connect_motor, self.serial_port)
         self.threadpool.start(worker)
 
     @Slot()
     def disconnect_printer(self):
-        if self.motor_instance.disconnect_printer():
+        if self.motor_instance.disconnect_motor():
             self.building_plate_is_moving = False
             self.projector_is_moving = False
             self.is_connected = False
@@ -109,7 +110,7 @@ class DLPMotorController(QObject):
         if self.is_connected:
             self.building_plate_is_moving = True
             # self.motor_instance.home_building_plate()
-            worker = Worker(self.motor_instance.home_building_plate)
+            worker = Worker(self.motor_instance.home_motor)
             self.threadpool.start(worker)
             return True
         else:
@@ -144,7 +145,7 @@ class DLPMotorController(QObject):
             self.print_text_signal.emit("Building plate already moving!")
             return
         if self.is_connected:
-            if self.motor_instance.move_building_plate(target_mm, self.feed_rate, relative_move):
+            if self.motor_instance.move_motor(target_mm, self.feed_rate, relative_move):
                 self.building_plate_is_moving = True
                 if print_on:
                     self.print_text_signal.emit("...moving the building plate by " + str(target_mm) + "mm...")
@@ -168,7 +169,7 @@ class DLPMotorController(QObject):
             self.print_text_signal.emit("Building plate already moving!")
             return
         if self.is_connected:
-            if self.motor_instance.move_building_plate(self.building_plate_origin, self.feed_rate, relative_move=False):
+            if self.motor_instance.move_motor(self.building_plate_origin, self.feed_rate, is_relative=False):
                 self.building_plate_is_moving = True
                 distance_to_target = abs(self.current_plate_position - self.building_plate_origin)
                 self.__wait_for_movement__(distance_to_target, self.feed_rate, message)
@@ -190,7 +191,7 @@ class DLPMotorController(QObject):
                     self.projector_current_position += target
                     distance_to_target = target
                 else:
-                    distance_to_target = abs(self.current_plate_position - target)
+                    distance_to_target = abs(self.projector_current_position - target)
                     self.projector_current_position = target
                 self.__wait_for_movement__(distance_to_target, self.projector_feed_rate, self.MOVEMENT_MESSAGE.PROJECTOR_MOVEMENT)
         else:

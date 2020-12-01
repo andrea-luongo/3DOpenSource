@@ -1,36 +1,31 @@
 import sys
-from PySide2.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QPushButton, QWidget, QStackedLayout, QSizePolicy, \
-    QLayout
+from PySide2.QtWidgets import QMainWindow, QHBoxLayout, QPushButton, QWidget, QGridLayout, QVBoxLayout, QMenuBar, \
+    QAction, QDialog, QGroupBox, QLabel, QComboBox
 from PySide2.QtCore import QLocale
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtCore import Signal, Slot, QFile, QIODevice, QJsonDocument
 from DLPPrinter.dlpGUI import DLPGUI
+from MetalPrinter.metalGUI import MetalGUI
 from pathlib import Path
 
 
-class MainGui(QWidget):
+class MainGui(QMainWindow):
 
     def __init__(self, parent=None):
         QLocale.setDefault(QLocale.English)
-        QWidget.__init__(self, parent)
+        QMainWindow.__init__(self, parent)
         self.setWindowTitle("AMLab Software v1.0")
         self.supported_printers = ['DLP', 'Metal']
-        self.setup_widget = None
+        self.selected_printer = self.supported_printers[0]
+        self.__init_setup__()
         self.dlp_gui = None
         self.metal_gui = None
-        self.stacked_layout = QStackedLayout()
-        self.main_layout = QVBoxLayout()
-        self.main_layout.addLayout(self.stacked_layout)
-        self.setLayout(self.main_layout)
-        # self.main_layout.setSizeConstraint(QLayout.SetFixedSize)
+        # self.dlp_gui.hide()
+        # self.metal_gui.hide()
+        self.setup_widget.hide()
+        self.__init_menu_bar__()
         if not self.__load_settings__():
-            self.__init_setup__()
-
-    def minimumSizeHint(self):
-        return self.stacked_layout.currentWidget().minimumSizeHint()
-
-    def sizeHint(self):
-        return self.stacked_layout.currentWidget().sizeHint()
+            self.__select_setup_widget__()
 
     def __load_settings__(self):
         base_path = Path(__file__).parent
@@ -62,44 +57,85 @@ class MainGui(QWidget):
         self.setup_layout.addWidget(dlp_button)
         self.setup_layout.addWidget(metal_button)
         self.setup_widget.setLayout(self.setup_layout)
-        self.stacked_layout.addWidget(self.setup_widget)
-        self.stacked_layout.setCurrentIndex(0)
+
+    def __select_setup_widget__(self):
+        self.setup_widget.show()
+        self.setCentralWidget(self.setup_widget)
 
     def __select_dlp__(self):
         self.dlp_gui = DLPGUI(self)
-        self.stacked_layout.addWidget(self.dlp_gui)
         self.selected_printer = self.supported_printers[0]
-        self.stacked_layout.setCurrentIndex(1)
+        self.setCentralWidget(self.dlp_gui)
         self.adjustSize()
 
     def __select_metal__(self):
-        self.dlp_gui = DLPGUI(self)
-        self.stacked_layout.addWidget(self.dlp_gui)
+        self.metal_gui = MetalGUI(self)
         self.selected_printer = self.supported_printers[1]
-        self.stacked_layout.setCurrentIndex(2)
+        self.setCentralWidget(self.metal_gui)
         self.adjustSize()
-# WIDTH = 800
-# HEIGHT = 600
 
     @Slot()
     def closeEvent(self, event: QCloseEvent):
-        if self.setup_widget:
-            self.setup_widget.close()
-        if self.dlp_gui:
+        try:
             self.dlp_gui.close()
-        if self.metal_gui:
+        except:
+            print("already deleted")
+        try:
             self.metal_gui.close()
+        except:
+            print("already deleted")
         event.accept()
 
+    def __init_menu_bar__(self):
+        self.__menu_bar = QMenuBar(self)
+        self.__init_file_menu()
+        self.setMenuBar(self.__menu_bar)
 
+    def __init_file_menu(self):
+        self.file_menu = self.__menu_bar.addMenu("File")
+        settings_action = QAction("Settings", self)
+        settings_action.setStatusTip("Open Settings")
+        settings_action.triggered.connect(self.__open_settings_window)
+        self.file_menu.addAction(settings_action)
 
-def main():
-    app = QApplication(sys.argv)
-    main_gui = MainGui()
-    main_gui.show()
-    sys.exit(app.exec_())
+    @Slot()
+    def __open_settings_window(self):
+        settings_window = QDialog(self)
+        settings_window.setWindowTitle("Settings")
+        printer_settings = QGroupBox("Printer Settings:", settings_window)
+        printer_type_label = QLabel("Printer Type:", printer_settings)
+        self.printer_type_combo = QComboBox(printer_settings)
+        self.printer_type_combo.addItems(self.supported_printers)
+        self.printer_type_combo.setCurrentIndex(self.supported_printers.index(self.selected_printer))
+        apply_button = QPushButton("Apply Changes", printer_settings)
+        apply_button.clicked.connect(self.__apply_settings)
+        apply_button.clicked.connect(settings_window.close)
+        apply_button.setAutoDefault(False)
+        printer_settings_layout = QGridLayout(printer_settings)
+        printer_settings_layout.addWidget(printer_type_label, 0, 0)
+        printer_settings_layout.addWidget(self.printer_type_combo, 0, 1)
+        printer_settings_layout.addWidget(apply_button, 4, 1)
+        if self.selected_printer is self.supported_printers[0]:
+            extra_settings = self.dlp_gui.get_settings_window(settings_window)
+        elif self.selected_printer is self.supported_printers[1]:
+            extra_settings = self.metal_gui.get_settings_window(settings_window)
+        settings_layout = QVBoxLayout(settings_window)
+        settings_layout.addWidget(printer_settings)
+        settings_layout.addWidget(extra_settings)
+        settings_window.open()
 
-
-if __name__ == "__main__":
-    main()
-
+    @Slot()
+    def __apply_settings(self):
+        self.selected_printer = self.supported_printers[self.printer_type_combo.currentIndex()]
+        try:
+            self.dlp_gui.close()
+        except:
+            print("already deleted")
+        try:
+            self.metal_gui.close()
+        except:
+            print("already deleted")
+        if self.selected_printer is self.supported_printers[0]:
+            self.__select_dlp__()
+        elif self.selected_printer is self.supported_printers[1]:
+            self.__select_metal__()

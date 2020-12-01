@@ -13,6 +13,8 @@ class DLPMainController(QObject):
     block_parameters_signal = Signal()
     reactivate_parameters_signal = Signal()
     etc_updated_signal = Signal(float)
+    motor_changed_signal = Signal(bool)
+    projector_changed_signal = Signal(bool)
 
     def __init__(self, printer_setup='BOTTOM-UP', projector_setup='VisitechDLP9000', motor_setup='ClearpathSDSK'):
         QObject.__init__(self)
@@ -24,9 +26,6 @@ class DLPMainController(QObject):
         self.TEST_MODE = False
         base_path = Path(__file__).parent
         self.output_file = str((base_path / '../resources/SAVED_POSITION.txt').resolve())
-        # self.output_file = '../resources/SAVED_POSITION.txt'
-        # self.__motor_controller = DLPMotorController(self.printer_setup, self.motor_setup)
-        # self.__projector_controller = DLPProjectorController(self.projector_setup)
         self.print_status = "SUCCESS"
         self.error_message = ""
         self.printing_date = ""
@@ -92,22 +91,41 @@ class DLPMainController(QObject):
         self.set_horizontal_mirroring(self.__default_parameters['horizontal_mirror'])
         self.set_vertical_mirroring(self.__default_parameters['vertical_mirror'])
         self.samples_per_pixel = int(self.__default_parameters['samples_per_pixel'])
-        self.save_default_parameters()
+        # self.save_default_parameters()
         self.connect_signals_to_slots()
 
     @Slot()
     def connect_signals_to_slots(self):
-        self.__motor_controller.print_text_signal.connect(self.print_to_console)
         self.__projector_controller.print_text_signal.connect(self.print_to_console)
         self.__projector_controller.display_image_signal.connect(self.display_image_preview)
+        self.__motor_controller.print_text_signal.connect(self.print_to_console)
         self.__motor_controller.repositioning_completed_signal.connect(self.project_next_layer)
         self.__motor_controller.ready_for_printing_signal.connect(self.prepare_next_layer)
         self.next_layer_timer.timeout.connect(self.prepare_next_layer)
 
+    def change_motor(self, printer_setup, motor_setup):
+        self.disconnect_printer()
+        self.printer_setup = printer_setup
+        self.motor_setup = motor_setup
+        self.set_default_parameter('printer_setup', self.printer_setup)
+        self.set_default_parameter('motor_setup', self.motor_setup)
+        self.__motor_controller = DLPMotorController(self.printer_setup, self.motor_setup, self.spindle_pitch_microns, self.motor_steps_per_revolution)
+        self.__motor_controller.print_text_signal.connect(self.print_to_console)
+        self.__motor_controller.repositioning_completed_signal.connect(self.project_next_layer)
+        self.__motor_controller.ready_for_printing_signal.connect(self.prepare_next_layer)
+        self.motor_changed_signal.emit(True)
+
+    def change_projector(self, projector_setup):
+        self.close_projector()
+        self.projector_setup = projector_setup
+        self.set_default_parameter('projector_setup', self.projector_setup)
+        self.__projector_controller = DLPProjectorController(self.projector_setup)
+        self.__projector_controller.print_text_signal.connect(self.print_to_console)
+        self.__projector_controller.display_image_signal.connect(self.display_image_preview)
+        self.projector_changed_signal.emit(True)
+
     @Slot()
     def stop_printing_process(self, save_parameters=True):
-        # if not self.is_printing:
-        #     return
         self.print_text_signal.emit("Stopping printing process...")
         if save_parameters:
             self.print_status = "STOPPED"
@@ -528,7 +546,7 @@ class DLPMainController(QObject):
 
     @Slot()
     def close_projector(self):
-        self.disconnect_printer()
+        # self.disconnect_printer()
         self.projector_amplitude = 0
         self.set_projector_amplitude()
         self.__projector_controller.stop_projector()
