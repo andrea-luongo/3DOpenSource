@@ -11,8 +11,8 @@ Add the moment this software supports the following projectors:
 
 - 	Visitech LRS-WQ: this projector uses i2c for communication and it comes with a proprietary usb-i2c adapter by Diolan. 
 	If you own this projector and its software, place the executable i2c_cmd.exe inside the "./resources" folder of this project.
-- 	Visitech LRS4KA: this projector comes with proprietary software written in C++ from Keynote Photonics. 
-	We provide a python wrapper for these libraries, in order to make it work place the following ".dll" files in the "./external_libraries/visitech/" folder: 
+- 	Visitech LRS4KA: this projector comes with proprietary software from Keynote Photonics written in C++. 
+	We provide a python wrapper for these libraries, in order to make it work place the following ".dll" files into the "./external_libraries/visitech/" folder: 
 	- "BSL430.dll"
 	- "KPDLP660.dll"
 	- "KPMSP430.dll"
@@ -21,9 +21,10 @@ Add the moment this software supports the following projectors:
 We also support the following motors:
 - Clearpath SDSK: which is controlled through an arduino running Marlin firmware
 - Clearpath SCSK: the software and C++ libraries to control this motor can be downloaded from www.teknic.com.
-  We provide a python wrapper for such libraries, in order to make it work copy the downloaded "sFoundation20.dll" file into the "./external_libraries/clearpath/" folder
+  We provide a python wrapper for such libraries. In order to make it work copy the downloaded "sFoundation20.dll" file into the "./external_libraries/clearpath/" folder
 - Physik Instrumente L511: python libraries can be installed https://pypi.org/project/PIPython/
 
+Regarding the Powder Bed Fusion metal printer, we provide a geometry slicer and a gcode sender. You should implement your own gcode interpreter on a microcontroller or other hardware. You might want to use different gcode commands than the one used in our software.
 
 You are welcome to implement new scripts for different models of motors and projectors :)
 You can find examples under DLPPrinter/projectors/ and DLPPrinter/motors. 
