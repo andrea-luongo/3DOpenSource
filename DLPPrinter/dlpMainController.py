@@ -16,7 +16,7 @@ class DLPMainController(QObject):
     motor_changed_signal = Signal(bool)
     projector_changed_signal = Signal(bool)
 
-    def __init__(self, printer_setup='BOTTOM-UP', projector_setup='VisitechDLP9000', motor_setup='ClearpathSDSK'):
+    def __init__(self, printer_setup='BOTTOM-UP', projector_setup='VisitechLRSWQ', motor_setup='ClearpathSDSK'):
         QObject.__init__(self)
         self.printer_setup = printer_setup
         self.projector_setup = projector_setup
@@ -458,7 +458,7 @@ class DLPMainController(QObject):
 
     @Slot()
     def reset_printer(self):
-        self.__motor_controller.reset_printer()
+        self.__motor_controller.reset_motor()
 
     @Slot()
     def connect_printer(self):

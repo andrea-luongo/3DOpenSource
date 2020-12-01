@@ -68,7 +68,7 @@ class NanoStage(QObject):
                 return False
 
     @Slot()
-    def reset_printer(self):
+    def reset_motor(self):
         if self.is_connected:
             try:
                 self.disconnect_printer()

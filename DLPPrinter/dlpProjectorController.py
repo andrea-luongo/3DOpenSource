@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 import numpy as np
 from DLPPrinter.dlpColorCalibrator import DLPColorCalibrator
-from DLPPrinter.projectors import visitechDLP9000
+from DLPPrinter.projectors import visitechDLP9000, visitechLRS4KA
 
 DEBUG_MODE_ON = False
 
@@ -15,11 +15,16 @@ class DLPProjectorController(QLabel):
     print_text_signal = Signal(str)
     display_image_signal = Signal(QPixmap)
 
-    def __init__(self, projector_setup="VisitechDLP9000"):
+    def __init__(self, projector_setup="VisitechLRSWQ"):
         QLabel.__init__(self)
         base_path = Path(__file__).parent
-        if projector_setup == 'VisitechDLP9000':
+        if projector_setup == 'VisitechLRSWQ':
             self.projector_instance = visitechDLP9000.VisitechDLP9000()
+        elif projector_setup == 'VisitechLRS4KA':
+            self.projector_instance = visitechLRS4KA.VisitechLRS4KA()
+            if self.projector_instance is None:
+                self.print_text_signal.emit("Visitech LRS4KA not supported: selected Visitech DLP9000")
+                self.projector_instance = visitechDLP9000.VisitechDLP9000()
         else:
             print("Error: an invalid projector was selected!")
             sys.exit(1)

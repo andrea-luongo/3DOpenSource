@@ -98,7 +98,7 @@ class DLPMotorController(QObject):
     @Slot()
     def reset_printer(self):
         if self.is_connected:
-            self.motor_instance.reset_printer()
+            self.motor_instance.reset_motor()
         else:
             self.print_text_signal.emit("The printer is NOT connected!")
 

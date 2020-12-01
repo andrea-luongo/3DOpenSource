@@ -83,7 +83,7 @@ class ClearpathSCSK(QObject):
             self.print_text_signal.emit("...connection NOT closed!")
             return False
 
-    def reset_printer(self):
+    def reset_motor(self):
         if self.is_connected:
             try:
                 if self.scskTeknic.close():
@@ -97,7 +97,10 @@ class ClearpathSCSK(QObject):
                 print(e)
                 return False
 
-    def home_motor(self, node=0, port=0, wait_for_motor=False):
+    def home_motor(self, *args):
+        node = args[0]
+        port = args[1]
+        wait_for_motor = args[2]
         if self.is_connected:
             try:
                 self.scskTeknic.enableNodeMotion(node, port)

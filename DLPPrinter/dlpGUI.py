@@ -15,7 +15,7 @@ class DLPGUI(QWidget):
         QWidget.__init__(self, parent)
         self.parent = parent
         self.supported_setups = ['BOTTOM-UP', 'TOP-DOWN']
-        self.supported_projectors = ['VisitechDLP9000']
+        self.supported_projectors = ['VisitechLRSWQ', 'VisitechLRS4KA']
         self.supported_motors = ['ClearpathSDSK', 'ClearpathSCSK', 'Nanostage']
         self.selected_setup = self.supported_setups[0]
         self.selected_projector = self.supported_projectors[0]

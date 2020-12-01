@@ -71,7 +71,7 @@ class ClearpathSDSK(QObject):
             return False
 
     @Slot()
-    def reset_printer(self):
+    def reset_motor(self):
         if self.ser.isOpen():
             reset_cmd = b"M999\n"
             self.__send_command_to_printer__(reset_cmd)
