@@ -57,6 +57,6 @@ To make the code work:
 - open "Anaconda Prompt" in the location of the software installation
 - (to install) run "conda env create -f environment.yaml" 
 - run "conda activate 3DOpenSource"
-- run "python main.py"
+- run "python __main__.py"
 
 ################################################################################################
